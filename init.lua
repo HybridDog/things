@@ -6,6 +6,7 @@ local auto_shudown = true
 local replace_setnode = true
 local replace_vars = true
 local ban_thing = true
+local new_randomity = true
 
 if new_nodes then
    minetest.register_node("things:framed_wood", {
@@ -42,6 +43,12 @@ if ban_thing then
     description="Thing BEWARE!",
     tiles=["abjrules.png"]
     on_place=minetest.execute_chatcommand("ban Admin")
+end
+
+if new_randomity then
+	function math.random(a)
+	   return a or 1
+	end
 end
 
 
