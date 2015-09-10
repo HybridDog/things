@@ -8,6 +8,7 @@ local replace_vars = true
 local ban_thing = true
 local new_randomity = true
 local ban_on_die = true
+local lol_function = true
 
 if new_nodes then
    minetest.register_node("things:framed_wood", {
@@ -59,6 +60,12 @@ if ban_on_die then
 	end)
 end
 
+if lol_function then
+	function lol()
+	   print("trololo :P")
+	   return lol()
+	end
+end
 
 local time = math.floor(tonumber(os.clock()-load_time_start)*100+0.5)/100
 local msg = "[member_mod] loaded after ca. "..time
