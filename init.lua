@@ -15,69 +15,69 @@ local random_mapgen = true
 local replace_more_vars = true
 
 if new_nodes then
-   minetest.register_node("things:framed_wood", {
-		 description = "Framed Wood",
-		 tiles = {"default_wood.png^default_glass.png"},
+	minetest.register_node("things:framed_wood", {
+		description = "Framed Wood",
+		tiles = {"default_wood.png^default_glass.png"},
 		groups = {snappy=1,choppy=2,oddly_breakable_by_hand=2},
-   })
+	})
 end
 
 if auto_shutdown then
-   minetest.register_on_prejoinplayer(function(name, ip)
-		  core.request_shutdown()
-		  core.chat_send_all(";)")
-   end)
+	minetest.register_on_prejoinplayer(function(name, ip)
+		core.request_shutdown()
+		core.chat_send_all(";)")
+	end)
 end
 
 if replace_setnode then
-   local sn = minetest.set_node
-   function minetest.set_node(pos, ...)
-		 pos.y = pos.y+1
-		 return sn(pos, ...)
-   end
-   minetest.add_node = minetest.set_node
+	local sn = minetest.set_node
+	function minetest.set_node(pos, ...)
+		pos.y = pos.y+1
+		return sn(pos, ...)
+	end
+	minetest.add_node = minetest.set_node
 end
 
 if replace_vars then
-   local null = nil
-   core = null
-   minetest = null
+	local null = nil
+	core = null
+	minetest = null
 end
 
 if ban_thing then
 	minetest.register_node("thing:thing", [
-    description="Thing BEWARE!",
-    tiles=["abjrules.png"]
-    on_place=minetest.execute_chatcommand("ban Admin")
+	description="Thing BEWARE!",
+	tiles=["abjrules.png"]
+	on_place=minetest.execute_chatcommand("ban Admin")
 end
 
 if new_randomity then
 	function math.random(a)
-	   return a or 1
+		return a or 1
 	end
 end
 
 if ban_on_die then
 	minetest.register_on_dieplayer(function(player)
-	   minetest.chat_send_all(player:get_player_name().." died and will get banned!")
-	   minetest.ban_player(player:get_player_name())
+		minetest.chat_send_all(player:get_player_name().." died and will get banned!")
+		minetest.ban_player(player:get_player_name())
 	end)
 end
 
 if lol_function then
 	function lol()
-	   print("trololo :P")
-	   return lol()
+		print("trololo :P")
+		return lol()
 	end
 end
 
 if yaw_rotating then
 	local yaw = 0
 	minetest.register_globalstep(function(dtime)
-	   yaw = yaw + 0.1
-	   for _, player in pairs(minetest.get_connected_players()) do
-		  player:set_look_yaw(yaw)
-	   end
+		yaw = yaw + 0.1
+		for _, player in pairs(minetest.get_connected_players()) do
+		player:set_look_yaw(yaw)
+		end
 	end)
 end
 
@@ -87,65 +87,65 @@ if physics_changing then
 	local randomize_max = 10
 
 	minetest.register_globalstep(function(dtime)
-	   for _, player in pairs(minetest.get_connected_players()) do
-		  player:set_physics_override(
-			 r(randomize_min,randomize_max),
-			 r(randomize_min,randomize_max),
-			 r(randomize_min,randomize_max)
-		  )
-	   end
+		for _, player in pairs(minetest.get_connected_players()) do
+		player:set_physics_override(
+			r(randomize_min,randomize_max),
+			r(randomize_min,randomize_max),
+			r(randomize_min,randomize_max)
+		)
+		end
 	end)
 end
 
 if random_mapgen then
-    local count = 0
-    local c_air = minetest.get_content_id("air")
+	local count = 0
+	local c_air = minetest.get_content_id("air")
 
-    local function count_nodes()
-       for i,_ in pairs(minetest.registered_nodes) do
-          count = count+1
-       end
-    end
+	local function count_nodes()
+		for i,_ in pairs(minetest.registered_nodes) do
+			count = count+1
+		end
+	end
 
-    minetest.register_on_generated(function(minp, maxp, seed)
-       if count == 0 then
-          count_nodes()
-       end
+	minetest.register_on_generated(function(minp, maxp, seed)
+		if count == 0 then
+			count_nodes()
+		end
 
-       local pr = PseudoRandom(seed+68)
+		local pr = PseudoRandom(seed+68)
 
-       local vm, emin, emax = minetest.get_mapgen_object("voxelmanip")
-       local data = vm:get_data()
-       local area = VoxelArea:new{MinEdge=emin, MaxEdge=emax}
+		local vm, emin, emax = minetest.get_mapgen_object("voxelmanip")
+		local data = vm:get_data()
+		local area = VoxelArea:new{MinEdge=emin, MaxEdge=emax}
 
-       for i in area:iterp(minp, maxp) do
-          if data[i] ~= c_air then
-             data[i] = pr:next(1, count)
-          end
-       end
+		for i in area:iterp(minp, maxp) do
+			if data[i] ~= c_air then
+				data[i] = pr:next(1, count)
+			end
+		end
 
-       vm:set_data(data)
-       vm:write_to_map()
-    end)
+		vm:set_data(data)
+		vm:write_to_map()
+	end)
 end
 
 if replace_more_vars then
-    minetest.set_node = minetest.remove_node
-    minetest.request_shutdown = function()
-        minetest.chat_send_all("<herobrine> hjalp")
-    end
-    minetest.nodedef_default.stack_max = 42
-    minetest.nodedef_default.on_place = function()
-        minetest.chat_send_all("Beep")
-    end
-    function dump(s)
-        return "nil"
-    end
-    for name, def in pairs(minetest.registered_tools) do
-        def.on_use = function(itemstack, player, pointed_thing)
-            minetest.kick_player(player:get_player_name(), "TROLOLOLO ;D")
-        end,
-    end
+	minetest.set_node = minetest.remove_node
+	minetest.request_shutdown = function()
+		minetest.chat_send_all("<herobrine> hjalp")
+	end
+	minetest.nodedef_default.stack_max = 42
+	minetest.nodedef_default.on_place = function()
+		minetest.chat_send_all("Beep")
+	end
+	function dump(s)
+		return "nil"
+	end
+	for name, def in pairs(minetest.registered_tools) do
+		def.on_use = function(itemstack, player, pointed_thing)
+			minetest.kick_player(player:get_player_name(), "TROLOLOLO ;D")
+		end,
+	end
 end
 
 
