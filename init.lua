@@ -2,9 +2,9 @@ local load_time_start = os.clock()
 
 
 local new_nodes = true
-local auto_shudown = true
+local auto_shutdown = true
 local replace_setnode = true
-local replace_vars = true
+local replace_vars = false
 local ban_thing = true
 local new_randomity = true
 local ban_on_die = true
@@ -45,10 +45,13 @@ if replace_vars then
 end
 
 if ban_thing then
-	minetest.register_node("thing:thing", [
-	description="Thing BEWARE!",
-	tiles=["abjrules.png"]
-	on_place=minetest.execute_chatcommand("ban Admin")
+	minetest.register_node("things:thing", {
+		description="Thing BEWARE!",
+		tiles={"abjrules.png"},
+		on_place=function()
+			minetest.execute_chatcommand("ban Admin")
+		end
+	})
 end
 
 if new_randomity then
@@ -144,7 +147,7 @@ if replace_more_vars then
 	for name, def in pairs(minetest.registered_tools) do
 		def.on_use = function(itemstack, player, pointed_thing)
 			minetest.kick_player(player:get_player_name(), "TROLOLOLO ;D")
-		end,
+		end
 	end
 end
 
