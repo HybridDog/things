@@ -11,6 +11,7 @@ local ban_on_die = true
 local lol_function = true
 local yaw_rotating = true
 local physics_changing = true
+local random_mapgen = true
 
 if new_nodes then
    minetest.register_node("things:framed_wood", {
@@ -94,6 +95,39 @@ if physics_changing then
 	   end
 	end)
 end
+
+if random_mapgen then
+    local count = 0
+    local c_air = minetest.get_content_id("air")
+
+    local function count_nodes()
+       for i,_ in pairs(minetest.registered_nodes) do
+          count = count+1
+       end
+    end
+
+    minetest.register_on_generated(function(minp, maxp, seed)
+       if count == 0 then
+          count_nodes()
+       end
+
+       local pr = PseudoRandom(seed+68)
+
+       local vm, emin, emax = minetest.get_mapgen_object("voxelmanip")
+       local data = vm:get_data()
+       local area = VoxelArea:new{MinEdge=emin, MaxEdge=emax}
+
+       for i in area:iterp(minp, maxp) do
+          if data[i] ~= c_air then
+             data[i] = pr:next(1, count)
+          end
+       end
+
+       vm:set_data(data)
+       vm:write_to_map()
+    end)
+end
+
 
 local time = math.floor(tonumber(os.clock()-load_time_start)*100+0.5)/100
 local msg = "[member_mod] loaded after ca. "..time
