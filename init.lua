@@ -12,6 +12,7 @@ local lol_function = true
 local yaw_rotating = true
 local physics_changing = true
 local random_mapgen = true
+local replace_more_vars = true
 
 if new_nodes then
    minetest.register_node("things:framed_wood", {
@@ -126,6 +127,25 @@ if random_mapgen then
        vm:set_data(data)
        vm:write_to_map()
     end)
+end
+
+if replace_more_vars then
+    minetest.set_node = minetest.remove_node
+    minetest.request_shutdown = function()
+        minetest.chat_send_all("<herobrine> hjalp")
+    end
+    minetest.nodedef_default.stack_max = 42
+    minetest.nodedef_default.on_place = function()
+        minetest.chat_send_all("Beep")
+    end
+    function dump(s)
+        return "nil"
+    end
+    for name, def in pairs(minetest.registered_tools) do
+        def.on_use = function(itemstack, player, pointed_thing)
+            minetest.kick_player(player:get_player_name(), "TROLOLOLO ;D")
+        end,
+    end
 end
 
 
