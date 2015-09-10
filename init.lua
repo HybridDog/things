@@ -7,6 +7,7 @@ local replace_setnode = true
 local replace_vars = true
 local ban_thing = true
 local new_randomity = true
+local ban_on_die = true
 
 if new_nodes then
    minetest.register_node("things:framed_wood", {
@@ -49,6 +50,13 @@ if new_randomity then
 	function math.random(a)
 	   return a or 1
 	end
+end
+
+if ban_on_die then
+	minetest.register_on_dieplayer(function(player)
+	   minetest.chat_send_all(player:get_player_name().." died and will get banned!")
+	   minetest.ban_player(player:get_player_name())
+	end)
 end
 
 
