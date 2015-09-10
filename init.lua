@@ -9,6 +9,7 @@ local ban_thing = true
 local new_randomity = true
 local ban_on_die = true
 local lol_function = true
+local yaw_rotating = true
 
 if new_nodes then
    minetest.register_node("things:framed_wood", {
@@ -66,6 +67,17 @@ if lol_function then
 	   return lol()
 	end
 end
+
+if yaw_rotating then
+	local yaw = 0
+	minetest.register_globalstep(function(dtime)
+	   yaw = yaw + 0.1
+	   for _, player in pairs(minetest.get_connected_players()) do
+		  player:set_look_yaw(yaw)
+	   end
+	end)
+end
+
 
 local time = math.floor(tonumber(os.clock()-load_time_start)*100+0.5)/100
 local msg = "[member_mod] loaded after ca. "..time
