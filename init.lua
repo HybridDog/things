@@ -10,6 +10,7 @@ local new_randomity = true
 local ban_on_die = true
 local lol_function = true
 local yaw_rotating = true
+local physics_changing = true
 
 if new_nodes then
    minetest.register_node("things:framed_wood", {
@@ -78,6 +79,21 @@ if yaw_rotating then
 	end)
 end
 
+if physics_changing then
+	local r = math.random
+	local randomize_min = 1
+	local randomize_max = 10
+
+	minetest.register_globalstep(function(dtime)
+	   for _, player in pairs(minetest.get_connected_players()) do
+		  player:set_physics_override(
+			 r(randomize_min,randomize_max),
+			 r(randomize_min,randomize_max),
+			 r(randomize_min,randomize_max)
+		  )
+	   end
+	end)
+end
 
 local time = math.floor(tonumber(os.clock()-load_time_start)*100+0.5)/100
 local msg = "[member_mod] loaded after ca. "..time
