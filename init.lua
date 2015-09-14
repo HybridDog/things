@@ -165,20 +165,23 @@ if tell_news then
 	http.TIMEOUT = 5
 
 	local feed = "https://queryfeed.net/twitter?q=minetest"
-	local old_tweet = ""
+	local old_tweet
+
+	local tweet
+	local function pcall_function()
+		local contents = tweet.responseData.feed.entries[1]
+		local text = "<"..contents.author.."> "..contents.content
+		if old_tweet ~= text then
+			old_tweet = text
+			minetest.chat_send_all(text)
+		end
+	end
 
 	local function get_latest_tweet()
 		local json = http.request("https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&q="..feed.."&num=1")
-		local tweet = json and minetest.parse_json(json) or {}
+		tweet = json and minetest.parse_json(json) or {}
 
-		pcall(function()
-			local contents = tweet.responseData.feed.entries[1]
-			local text = "<"..contents.author.."> "..contents.content
-			if old_tweet ~= text then
-				old_tweet = text
-				minetest.chat_send_all(text)
-			end
-		end)
+		pcall(pcall_function)
 
 		minetest.after(5, function()
 			get_latest_tweet()
