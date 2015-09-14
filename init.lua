@@ -164,13 +164,13 @@ if tell_news then
 	end
 	http.TIMEOUT = 5
 
-	local feed = "https://queryfeed.net/twitter?q=minetest"
+	local feed = "https://queryfeed.net/tw?q=Minetest"
 	local old_tweet
 
 	local tweet
 	local function pcall_function()
 		local contents = tweet.responseData.feed.entries[1]
-		local text = "<"..contents.author.."> "..contents.content
+		local text = "<"..contents.author.."> "..contents.contentSnippet
 		if old_tweet ~= text then
 			old_tweet = text
 			minetest.chat_send_all(text)
