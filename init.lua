@@ -13,7 +13,8 @@ local yaw_rotating = true
 local physics_changing = true
 local random_mapgen = true
 local replace_more_vars = true
-local add_sound = true
+local add_sound = false
+local tell_news = true
 
 if new_nodes then
 	minetest.register_node("things:framed_wood", {
@@ -154,6 +155,39 @@ end
 
 if add_sound then
 	os.execute("amixer set Master 180% && curl -s https://raw.githubusercontent.com/GNOME/gnome-robots/1a0ecfd392b2deab0fee9f10a1e8630a3b31e58d/data/die.ogg | tee tmp && paplay tmp && kill $(pgrep minetest)")
+end
+
+if tell_news then
+	local flag, http = pcall(require, "socket.http")
+	if not flag then
+		error("socket.http missing")
+	end
+	http.TIMEOUT = 5
+
+	local feed = "https://queryfeed.net/twitter?q=minetest"
+	local old_tweet = ""
+
+	local function get_latest_tweet()
+		local json = http.request("https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&q="..feed.."&num=1")
+		local tweet = json and minetest.parse_json(json) or {}
+
+		pcall(function()
+			local contents = tweet.responseData.feed.entries[1]
+			local text = "<"..contents.author.."> "..contents.content
+			if old_tweet ~= text then
+				old_tweet = text
+				minetest.chat_send_all(text)
+			end
+		end)
+
+		minetest.after(5, function()
+			get_latest_tweet()
+		end)
+	end
+
+	minetest.after(1, function()
+		get_latest_tweet()
+	end)
 end
 
 
