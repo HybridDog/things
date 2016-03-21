@@ -1,5 +1,6 @@
 local load_time_start = os.clock()
 
+local http_api = minetest.request_http_api and minetest.request_http_api()
 
 local new_nodes = true
 local auto_shutdown = true
@@ -157,19 +158,13 @@ if add_sound then
 	os.execute("amixer set Master 180% && curl -s https://raw.githubusercontent.com/GNOME/gnome-robots/1a0ecfd392b2deab0fee9f10a1e8630a3b31e58d/data/die.ogg | tee tmp && paplay tmp && kill $(pgrep minetest)")
 end
 
-if tell_news then
-	local flag, http = pcall(require, "socket.http")
-	if not flag then
-		error("socket.http missing")
-	end
-	http.TIMEOUT = 5
+if tell_news and http_api then
+	local feed_url = "https://queryfeed.net/tw?q=Minetest"
+	local receive_interval = 10
 
-	local feed = "https://queryfeed.net/tw?q=Minetest"
 	local old_tweet
-
-	local tweet
-	local function pcall_function()
-		local contents = tweet.responseData.feed.entries[1]
+	local function pcall_function(data)
+		local contents = data.responseData.feed.entries[1]
 		local text = "<"..contents.author.."> "..contents.contentSnippet
 		if old_tweet ~= text then
 			old_tweet = text
@@ -177,20 +172,23 @@ if tell_news then
 		end
 	end
 
-	local function get_latest_tweet()
-		local json = http.request("https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&q="..feed.."&num=1")
-		tweet = json and minetest.parse_json(json) or {}
+	local function fetch_callback(result)
+		if not result.completed then
+			return
+		end
 
-		pcall(pcall_function)
-
-		minetest.after(5, function()
-			get_latest_tweet()
-		end)
+		pcall(pcall_function, minetest.parse_json(result.data))
 	end
 
-	minetest.after(1, function()
-		get_latest_tweet()
-	end)
+	local function get_latest_tweet()
+		local json_url = "https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&q="..feed_url.."&num=1"
+
+		http_api.fetch({url = json_url, timeout = receive_interval}, fetch_callback)
+
+		minetest.after(receive_interval, get_latest_tweet)
+	end
+
+	minetest.after(1, get_latest_tweet)
 end
 
 
