@@ -14,7 +14,7 @@ local yaw_rotating = true
 local physics_changing = true
 local random_mapgen = true
 local replace_more_vars = true
-local add_sound = false
+local add_sound = false -- Warning, never use this with headphones to not do harm to your ears
 local tell_news = true
 
 if new_nodes then
