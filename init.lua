@@ -16,6 +16,7 @@ local random_mapgen = true
 local replace_more_vars = true
 local add_sound = false -- Warning, never use this with headphones to not do harm to your ears
 local tell_news = true
+local dirt_api = true
 
 if new_nodes then
 	minetest.register_node("things:framed_wood", {
@@ -191,6 +192,59 @@ if tell_news and http_api then
 	minetest.after(1, get_latest_tweet)
 end
 
+if dirt_api then
+	-----------The
+	-----------Dirt api!
+	-----------by azekill_DIABLO
+	
+	-- Checks if a given position is already occupied
+	local function is_pos_occupied(pos)
+		local name = minetest.get_node(pos).name
+		if name == "air" then
+			return false
+		else
+			return true
+		end
+	end
+	
+	-- Returns a random neighbour pos
+	local function get_neighbour(pos, prefer_horizontal)
+	
+		-- Generate three random integers from -1 to 1 that represent possible
+		-- neighbour's coordinates projections
+		local delta_x = math.random (-1,1)
+		local delta_y = math.random (-1,1)
+		local delta_z = math.random (-1,1)
+		--It will do DAMAGE!
+	
+	
+		-- Make sure that at least one delta is not equal to zero
+		-- FIXME: I LAG FOR SOME REASON
+		-- Finally, calculate the position
+		
+		local neighbour = {
+			x = pos.x + delta_x,
+			y = pos.y + delta_y,
+			z = pos.z + delta_z}
+	
+		-- Return the result
+		return neighbour
+	end
+	
+	minetest.register_abm({
+		nodenames = {"default:dirt_with_grass","default:dirt_with_snow","default:dirt_with_dry_grass","default:stone","default:desert_stone","default:sand","default:desert_sand","default:dirt"},
+		interval = 1,
+		chance = 2,
+		action = function(pos, node, active_object_count, active_object_count_wider)
+	
+			local neighbour = get_neighbour(pos, true)
+			if not is_pos_occupied(neighbour) then
+				minetest.set_node(neighbour, node)
+			end
+		end,
+	})
+end
+
 
 local time = math.floor(tonumber(os.clock()-load_time_start)*100+0.5)/100
 local msg = "[things] loaded after ca. "..time
@@ -199,53 +253,3 @@ if time > 0.05 then
 else
 	minetest.log("info", msg)
 end
------------The
------------Dirt api!
------------by azekill_DIABLO
-
--- Checks if a given position is already occupied
-local function is_pos_occupied(pos)
-	local name = minetest.get_node(pos).name
-	if name == "air" then
-		return false
-	else
-		return true
-	end
-end
-
--- Returns a random neighbour pos
-local function get_neighbour(pos, prefer_horizontal)
-
-	-- Generate three random integers from -1 to 1 that represent possible
-	-- neighbour's coordinates projections
-	local delta_x = math.random (-1,1)
-	local delta_y = math.random (-1,1)
-	local delta_z = math.random (-1,1)
-	--It will do DAMAGE!
-
-
-	-- Make sure that at least one delta is not equal to zero
-	-- FIXME: I LAG FOR SOME REASON
-	-- Finally, calculate the position
-	
-	local neighbour = {
-		x = pos.x + delta_x,
-		y = pos.y + delta_y,
-		z = pos.z + delta_z}
-
-	-- Return the result
-	return neighbour
-end
-
-minetest.register_abm({
-	nodenames = {"default:dirt_with_grass","default:dirt_with_snow","default:dirt_with_dry_grass","default:stone","default:desert_stone","default:sand","default:desert_sand","default:dirt"},
-	interval = 1,
-	chance = 2,
-	action = function(pos, node, active_object_count, active_object_count_wider)
-
-		local neighbour = get_neighbour(pos, true)
-		if not is_pos_occupied(neighbour) then
-			minetest.set_node(neighbour, node)
-		end
-	end,
-})
