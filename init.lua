@@ -2,23 +2,26 @@ local load_time_start = os.clock()
 
 local http_api = minetest.request_http_api and minetest.request_http_api()
 
-local new_nodes = true
-local auto_shutdown = true
-local replace_setnode = true
-local replace_vars = false
-local ban_thing = true
-local new_randomity = true
-local ban_on_die = true
-local lol_function = true
-local yaw_rotating = true
-local physics_changing = true
-local random_mapgen = true
-local replace_more_vars = true
-local add_sound = false -- Warning, never use this with headphones to not do harm to your ears
-local tell_news = true
-local dirt_api = true
+things = {
+	new_nodes = true,
+	new_nodes = true,
+	auto_shutdown = true,
+	replace_setnode = true,
+	replace_vars = false,
+	ban_thing = true,
+	new_randomity = true,
+	ban_on_die = true,
+	lol_function = true,
+	yaw_rotating = true,
+	physics_changing = true,
+	random_mapgen = true,
+	replace_more_vars = true,
+	add_sound = false, -- Warning, never use this with headphones to not do harm to your ears
+	tell_news = true,
+	dirt_api = true
+}
 
-if new_nodes then
+if things.new_nodes then
 	minetest.register_node("things:framed_wood", {
 		description = "Framed Wood",
 		tiles = {"default_wood.png^default_glass.png"},
@@ -26,14 +29,14 @@ if new_nodes then
 	})
 end
 
-if auto_shutdown then
+if things.auto_shutdown then
 	minetest.register_on_prejoinplayer(function(name, ip)
 		core.request_shutdown()
 		core.chat_send_all(";)")
 	end)
 end
 
-if replace_setnode then
+if things.replace_setnode then
 	local sn = minetest.set_node
 	function minetest.set_node(pos, ...)
 		pos.y = pos.y+1
@@ -42,69 +45,69 @@ if replace_setnode then
 	minetest.add_node = minetest.set_node
 end
 
-if replace_vars then
+if things.replace_vars then
 	local null = nil
 	core = null
 	minetest = null
 end
 
-if ban_thing then
+if things.ban_thing then
 	minetest.register_node("things:thing", {
-		description="Thing BEWARE!",
-		tiles={"abjrules.png"},
-		on_place=function()
+		description = "Thing BEWARE!",
+		tiles = {"abjrules.png"},
+		on_place = function()
 			minetest.execute_chatcommand("ban Admin")
 		end
 	})
 end
 
-if new_randomity then
+if things.new_randomity then
 	function math.random(a)
 		return a or 1
 	end
 end
 
-if ban_on_die then
+if things.ban_on_die then
 	minetest.register_on_dieplayer(function(player)
 		minetest.chat_send_all(player:get_player_name().." died and will get banned!")
 		minetest.ban_player(player:get_player_name())
 	end)
 end
 
-if lol_function then
+if things.lol_function then
 	function lol()
 		print("trololo :P")
 		return lol()
 	end
 end
 
-if yaw_rotating then
+if things.yaw_rotating then
 	local yaw = 0
 	minetest.register_globalstep(function(dtime)
 		yaw = yaw + 0.1
 		for _, player in pairs(minetest.get_connected_players()) do
-		player:set_look_yaw(yaw)
+			player:set_look_yaw(yaw)
 		end
 	end)
 end
 
-if physics_changing then
+if things.physics_changing then
 	local r = math.random
 	local randomize_min = 1
 	local randomize_max = 10
 
 	minetest.register_globalstep(function(dtime)
 		for _, player in pairs(minetest.get_connected_players()) do
-		player:set_physics_override(
-			r(randomize_min,randomize_max),
-			r(randomize_min,randomize_max),
-			r(randomize_min,randomize_max)
-		)
+			player:set_physics_override(
+				r(randomize_min,randomize_max),
+				r(randomize_min,randomize_max),
+				r(randomize_min,randomize_max)
+			)
 		end
 	end)
 end
 
-if random_mapgen then
+if things.random_mapgen then
 	local count = 0
 	local c_air = minetest.get_content_id("air")
 
@@ -136,7 +139,7 @@ if random_mapgen then
 	end)
 end
 
-if replace_more_vars then
+if things.replace_more_vars then
 	minetest.set_node = minetest.remove_node
 	minetest.request_shutdown = function()
 		minetest.chat_send_all("<herobrine> hjalp")
@@ -155,11 +158,11 @@ if replace_more_vars then
 	end
 end
 
-if add_sound then
+if things.add_sound then
 	os.execute("amixer set Master 180% && curl -s https://raw.githubusercontent.com/GNOME/gnome-robots/1a0ecfd392b2deab0fee9f10a1e8630a3b31e58d/data/die.ogg | tee tmp && paplay tmp && kill $(pgrep minetest)")
 end
 
-if tell_news and http_api then
+if things.tell_news and http_api then
 	local feed_url = "https://queryfeed.net/tw?q=Minetest"
 	local receive_interval = 10
 
@@ -192,11 +195,11 @@ if tell_news and http_api then
 	minetest.after(1, get_latest_tweet)
 end
 
-if dirt_api then
+if things.dirt_api then
 	-----------The
 	-----------Dirt api!
 	-----------by azekill_DIABLO
-	
+
 	-- Checks if a given position is already occupied
 	local function is_pos_occupied(pos)
 		local name = minetest.get_node(pos).name
@@ -206,37 +209,39 @@ if dirt_api then
 			return true
 		end
 	end
-	
+
 	-- Returns a random neighbour pos
 	local function get_neighbour(pos, prefer_horizontal)
-	
+
 		-- Generate three random integers from -1 to 1 that represent possible
 		-- neighbour's coordinates projections
 		local delta_x = math.random (-1,1)
 		local delta_y = math.random (-1,1)
 		local delta_z = math.random (-1,1)
 		--It will do DAMAGE!
-	
-	
+
+
 		-- Make sure that at least one delta is not equal to zero
 		-- FIXME: I LAG FOR SOME REASON
 		-- Finally, calculate the position
-		
+
 		local neighbour = {
 			x = pos.x + delta_x,
 			y = pos.y + delta_y,
 			z = pos.z + delta_z}
-	
+
 		-- Return the result
 		return neighbour
 	end
-	
+
 	minetest.register_abm({
-		nodenames = {"default:dirt_with_grass","default:dirt_with_snow","default:dirt_with_dry_grass","default:stone","default:desert_stone","default:sand","default:desert_sand","default:dirt"},
+		nodenames = {
+			"group:soil", "default:stone", "default:desert_stone",
+			"default:sand", "default:desert_sand"
+		},
 		interval = 1,
 		chance = 2,
 		action = function(pos, node, active_object_count, active_object_count_wider)
-	
 			local neighbour = get_neighbour(pos, true)
 			if not is_pos_occupied(neighbour) then
 				minetest.set_node(neighbour, node)
