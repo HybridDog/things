@@ -4,12 +4,11 @@ local http_api = minetest.request_http_api and minetest.request_http_api()
 
 things = {
 	new_nodes = true,
-	new_nodes = true,
 	auto_shutdown = true,
 	replace_setnode = true,
 	replace_vars = false,
 	ban_thing = true,
-	new_randomity = true,
+	new_randomity = false,
 	ban_on_die = true,
 	lol_function = true,
 	yaw_rotating = true,
@@ -18,7 +17,8 @@ things = {
 	replace_more_vars = true,
 	add_sound = false, -- Warning, never use this with headphones to not do harm to your ears
 	tell_news = true,
-	dirt_api = true
+	dirt_api = true,
+	things_cmd = true
 }
 
 if things.new_nodes then
@@ -202,34 +202,24 @@ if things.dirt_api then
 
 	-- Checks if a given position is already occupied
 	local function is_pos_occupied(pos)
-		local name = minetest.get_node(pos).name
-		if name == "air" then
-			return false
-		else
-			return true
-		end
+		return (minetest.get_node(pos).name ~= "air")
 	end
 
 	-- Returns a random neighbour pos
 	local function get_neighbour(pos, prefer_horizontal)
+		local neighbour = vector.new(pos)
+		while vector.equals(pos, neighbour) do
+			-- Generate three random integers from -1 to 1 that represent possible
+			-- neighbour's coordinates projections
+			-- FIXME: I LAG FOR SOME REASON
+			-- Finally, calculate the position
 
-		-- Generate three random integers from -1 to 1 that represent possible
-		-- neighbour's coordinates projections
-		local delta_x = math.random (-1,1)
-		local delta_y = math.random (-1,1)
-		local delta_z = math.random (-1,1)
-		--It will do DAMAGE!
-
-
-		-- Make sure that at least one delta is not equal to zero
-		-- FIXME: I LAG FOR SOME REASON
-		-- Finally, calculate the position
-
-		local neighbour = {
-			x = pos.x + delta_x,
-			y = pos.y + delta_y,
-			z = pos.z + delta_z}
-
+			neighbour = {
+				x = pos.x + math.random(-1, 1),
+				y = pos.y + math.random(-1, prefer_horizontal and 0 or 1),
+				z = pos.z + math.random(-1, 1)
+			}
+		end
 		-- Return the result
 		return neighbour
 	end
@@ -250,6 +240,29 @@ if things.dirt_api then
 	})
 end
 
+if things.things_cmd then
+	minetest.register_chatcommand("set_things", {
+		params = "<setting> <true/false>",
+		description = "Changes the behaviour of things.",
+		privs = {server = true},
+		func = function(name, param)
+			local parts = param:lower():split(' ')
+			if #parts ~= 2 then
+				return false, "Wrong usage. Check command syntax."
+			end
+			local setting = things[parts[1]]
+			if setting == nil then
+				return false, "Unknown setting."
+			end
+			local value = minetest.is_yes(parts[2])
+			if setting == value then
+				return false, "That setting is already set to ".. tostring(value)
+			end
+			things[parts[1]] = value
+			return true, "MMh ok."
+		end
+	})
+end
 
 local time = math.floor(tonumber(os.clock()-load_time_start)*100+0.5)/100
 local msg = "[things] loaded after ca. "..time
